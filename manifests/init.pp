@@ -21,7 +21,7 @@ class apcupsd {
     ensure => installed,
   }
 
-  define ups($type = 'apcsmart', $cable = 'smart', $device = '/dev/ttyS0', $ensure = 'present') {
+  define ups($upstype = 'apcsmart', $cable = 'smart', $device = '/dev/ttyS0', $ensure = 'present') {
 
     $ups_configured = $ensure ? {
       'present' => 'yes',
@@ -37,14 +37,14 @@ class apcupsd {
       ensure => 'directory',
       owner  => 'root',
       group  => 'root',
-      mode   =>  755,
+      mode   =>  0755,
     }
 
     file { "/etc/apcupsd/apcupsd.conf":
       ensure  => present,
       owner   => root,
       group   => root,
-      mode    => 644,
+      mode    => 0644,
       notify  => Service["apcupsd"],
       require => File["/etc/apcupsd"],
       content => template('apcupsd/apcupsd.conf.erb'),
@@ -54,7 +54,7 @@ class apcupsd {
       ensure  => present,
       owner   => root,
       group   => root,
-      mode    => 644,
+      mode    => 0644,
       notify  => Service["apcupsd"],
       content => template('apcupsd/default/apcupsd.erb'),
     }
