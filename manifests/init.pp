@@ -21,7 +21,8 @@ class apcupsd {
     ensure => installed,
   }
 
-  define ups($upstype = 'apcsmart', $cable = 'smart', $device = '/dev/ttyS0', $ensure = 'present') {
+  define ups($upstype = 'apcsmart', $cable = 'smart', $device = '/dev/ttyS0', $ensure = 'present',
+             $nisip = '127.0.0.1', $polltime = '60') {
 
     $ups_configured = $ensure ? {
       'present' => 'yes',

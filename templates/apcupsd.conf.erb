@@ -82,7 +82,7 @@ DEVICE <%= device %>
 #   will improve apcupsd's responsiveness to certain events at the cost of
 #   higher CPU utilization. The default of 60 is appropriate for most
 #   situations.
-#POLLTIME 60
+POLLTIME <%= polltime %>
 
 # LOCKFILE <path to lockfile>
 #   Path for device lock file. Not used on Win32.
@@ -188,7 +188,7 @@ NETSERVER on
 #  NIS will listen for connections only on that interface. Use the
 #  loopback address (127.0.0.1) to accept connections only from the
 #  local machine.
-NISIP 127.0.0.1
+NISIP <%= nisip %>
 
 # NISPORT <port> default is 3551 as registered with the IANA
 #  port to use for sending STATUS and EVENTS data over the network.
