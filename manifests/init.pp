@@ -16,55 +16,59 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-class apcupsd {
+class apcupsd(
+  $upstype = 'apcsmart',
+  $cable = 'smart',
+  $device = '/dev/ttyS0',
+  $ensure = 'present',
+  $nisip = '127.0.0.1',
+  $polltime = '60' )
+{
+
   package { "apcupsd":
     ensure => installed,
   }
 
-  define ups($upstype = 'apcsmart', $cable = 'smart', $device = '/dev/ttyS0', $ensure = 'present',
-             $nisip = '127.0.0.1', $polltime = '60') {
+  $ups_configured = $ensure ? {
+    'present' => 'yes',
+    'absent'  => 'no',
+  }
 
-    $ups_configured = $ensure ? {
-      'present' => 'yes',
-      'absent'  => 'no',
-    }
+  $ups_state = $ensure ? {
+    'present' => 'running',
+    'absent'  => 'stopped',
+  }
 
-    $ups_state = $ensure ? {
-      'present' => 'running',
-      'absent'  => 'stopped',
-    }
+  file { "/etc/apcupsd":
+    ensure => 'directory',
+    owner  => 'root',
+    group  => 'root',
+    mode   =>  0755,
+  }
 
-    file { "/etc/apcupsd":
-      ensure => 'directory',
-      owner  => 'root',
-      group  => 'root',
-      mode   =>  0755,
-    }
+  file { "/etc/apcupsd/apcupsd.conf":
+    ensure  => present,
+    owner   => root,
+    group   => root,
+    mode    => 0644,
+    notify  => Service["apcupsd"],
+    require => File["/etc/apcupsd"],
+    content => template('apcupsd/apcupsd.conf.erb'),
+  }
 
-    file { "/etc/apcupsd/apcupsd.conf":
-      ensure  => present,
-      owner   => root,
-      group   => root,
-      mode    => 0644,
-      notify  => Service["apcupsd"],
-      require => File["/etc/apcupsd"],
-      content => template('apcupsd/apcupsd.conf.erb'),
-    }
+  file { "/etc/default/apcupsd":
+    ensure  => present,
+    owner   => root,
+    group   => root,
+    mode    => 0644,
+    notify  => Service["apcupsd"],
+    content => template('apcupsd/default/apcupsd.erb'),
+  }
 
-    file { "/etc/default/apcupsd": 
-      ensure  => present,
-      owner   => root,
-      group   => root,
-      mode    => 0644,
-      notify  => Service["apcupsd"],
-      content => template('apcupsd/default/apcupsd.erb'),
-    }
-
-    service { "apcupsd":
-      enable     => true,
-      ensure     => $ups_state,
-      hasrestart => true,
-      require    => [ File["/etc/apcupsd/apcupsd.conf"], Package["apcupsd"] ],
-    }
+  service { "apcupsd":
+    enable     => true,
+    ensure     => $ups_state,
+    hasrestart => true,
+    require    => [ File["/etc/apcupsd/apcupsd.conf"], Package["apcupsd"] ],
   }
 }
