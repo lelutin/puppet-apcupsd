@@ -22,6 +22,8 @@ class apcupsd(
   $device = '/dev/ttyS0',
   $ensure = 'present',
   $nisip = '127.0.0.1',
+  $admin = 'root',
+  $mail = 'mail',
   $polltime = '60' )
 {
 
@@ -54,6 +56,16 @@ class apcupsd(
     notify  => Service["apcupsd"],
     require => File["/etc/apcupsd"],
     content => template('apcupsd/apcupsd.conf.erb'),
+  }
+
+  file { "/etc/apcupsd/changeme":
+    ensure  => present,
+    owner   => root,
+    group   => root,
+    mode    => 0755,
+    notify  => Service["apcupsd"],
+    require => File["/etc/apcupsd"],
+    content => template('apcupsd/changeme.erb'),
   }
 
   file { "/etc/default/apcupsd":
