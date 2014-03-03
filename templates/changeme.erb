@@ -1,0 +1,25 @@
+#!/bin/sh
+#
+# THIS FILE IS BEING MANAGED BY PUPPET
+# ANY MODIFICATIONS MADE MANUALLY WILL BE OVERWRITTEN
+# ON THE NEXT PUPPET RUN
+#
+# This shell script if placed in /etc/apcupsd
+# will be called by /etc/apcupsd/apccontrol when apcupsd
+# detects that the battery should be replaced.
+# We send an email message to root to notify him.
+#
+SYSADMIN=<%= admin %>
+APCUPSD_MAIL=<%= mail %>
+
+HOSTNAME=`hostname`
+MSG="$HOSTNAME UPS battery needs changing NOW."
+#
+(
+   echo "Subject: $MSG"
+   echo " "
+   echo "$MSG"
+   echo " "
+   /sbin/apcaccess status
+) | $APCUPSD_MAIL -s "$MSG" $SYSADMIN
+exit 0
