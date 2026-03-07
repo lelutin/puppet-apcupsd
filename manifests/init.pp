@@ -15,19 +15,40 @@
 # 
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-class apcupsd(
-  $upstype = 'apcsmart',
-  $cable = 'smart',
-  $device = '/dev/ttyS0',
-  $ensure = 'present',
-  $nisip = '127.0.0.1',
-  $admin = 'root',
-  $mail = 'mail',
-  $polltime = '60' )
-{
-
-  package { "apcupsd":
+#
+# @summary Install daemon acpupsd to communicate with a UPS
+#
+# @param ensure
+#   Set to absent to tell apcupsd that it is not configured and to stop the
+#   service.
+# @param upstype
+#   Type of UPS device being connected to
+# @param cable
+#   Type of connection used with the UPS
+# @param device
+#   Device file used for certain types
+# @param nisip
+#   IP address on which the network information service will listen for
+#   connections.
+# @param admin
+#   User name or email address for service administrator. Mails will be sent to
+#   the user or address when the battery needs to be changed.
+# @param mail
+#   Command used to send emails for battery change alerts.
+# @param polltime
+#   Interval in seconds between each polls to the UPS.
+#
+class apcupsd (
+  Enum['present', 'absent'] $ensure = 'present',
+  String $upstype = 'apcsmart',
+  String $cable = 'smart',
+  String $device = '/dev/ttyS0',
+  String $nisip = '127.0.0.1',
+  String $admin = 'root',
+  String $mail = 'mail',
+  Integer[0] $polltime = 60,
+) {
+  package { 'apcupsd':
     ensure => installed,
   }
 
@@ -41,46 +62,46 @@ class apcupsd(
     'absent'  => 'stopped',
   }
 
-  file { "/etc/apcupsd":
+  file { '/etc/apcupsd':
     ensure => 'directory',
     owner  => 'root',
     group  => 'root',
-    mode   =>  0755,
+    mode   => '0755',
   }
 
-  file { "/etc/apcupsd/apcupsd.conf":
-    ensure  => present,
+  file { '/etc/apcupsd/apcupsd.conf':
+    ensure  => file,
     owner   => root,
     group   => root,
-    mode    => 0644,
-    notify  => Service["apcupsd"],
-    require => File["/etc/apcupsd"],
+    mode    => '0644',
+    notify  => Service['apcupsd'],
+    require => File['/etc/apcupsd'],
     content => template('apcupsd/apcupsd.conf.erb'),
   }
 
-  file { "/etc/apcupsd/changeme":
-    ensure  => present,
+  file { '/etc/apcupsd/changeme':
+    ensure  => file,
     owner   => root,
     group   => root,
-    mode    => 0755,
-    notify  => Service["apcupsd"],
-    require => File["/etc/apcupsd"],
+    mode    => '0755',
+    notify  => Service['apcupsd'],
+    require => File['/etc/apcupsd'],
     content => template('apcupsd/changeme.erb'),
   }
 
-  file { "/etc/default/apcupsd":
-    ensure  => present,
+  file { '/etc/default/apcupsd':
+    ensure  => file,
     owner   => root,
     group   => root,
-    mode    => 0644,
-    notify  => Service["apcupsd"],
+    mode    => '0644',
+    notify  => Service['apcupsd'],
     content => template('apcupsd/default/apcupsd.erb'),
   }
 
-  service { "apcupsd":
-    enable     => true,
+  service { 'apcupsd':
     ensure     => $ups_state,
+    enable     => true,
     hasrestart => true,
-    require    => [ File["/etc/apcupsd/apcupsd.conf"], Package["apcupsd"] ],
+    require    => [File['/etc/apcupsd/apcupsd.conf'], Package['apcupsd']],
   }
 }
